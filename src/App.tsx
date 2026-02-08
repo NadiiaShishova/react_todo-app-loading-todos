@@ -13,22 +13,24 @@ export interface Todo {
   userId: number;
 }
 
+enum ErrorMessage {
+  NONE = '',
+  UNABLE_TO_LOAD = 'Unable to load todos',
+  EMPTY_TITLE = 'Title should not be empty',
+  UNABLE_TO_ADD = 'Unable to add a todo',
+  UNABLE_TO_DELETE = 'Unable to delete a todo',
+}
+
 export const App: React.FC = () => {
-  // ======================
-  // State
-  // ======================
   const [todos, setTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [newTitle, setNewTitle] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<ErrorMessage>(ErrorMessage.NONE);
   const [loadingIds, setLoadingIds] = useState<number[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ======================
-  // Effects
-  // ======================
   useEffect(() => {
     getTodos()
       .then(setTodos)
@@ -49,16 +51,10 @@ export const App: React.FC = () => {
     return () => clearTimeout(timerId);
   }, [error]);
 
-  // ======================
-  // Guard
-  // ======================
   if (!USER_ID) {
     return <UserWarning />;
   }
 
-  // ======================
-  // Handlers
-  // ======================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -124,9 +120,6 @@ export const App: React.FC = () => {
     setTodos(current => current.filter(todo => !todo.completed));
   };
 
-  // ======================
-  // Derived values
-  // ======================
   const visibleTodos = todos.filter(todo => {
     if (filter === 'active') {
       return !todo.completed;
@@ -142,9 +135,6 @@ export const App: React.FC = () => {
   const completedCount = todos.filter(todo => todo.completed).length;
   const activeCount = todos.length - completedCount;
 
-  // ======================
-  // Render
-  // ======================
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
